@@ -1,0 +1,26 @@
+{
+  "name": "Teste Template de envio Rock Plus",
+  "created_at": "2025-07-21T12:18:12.773603",
+  "sequence": [
+    {
+      "type": "text",
+      "content": "Hello, {nome}! Tudo Bem? Aqui é da Rockfeller, vc já viu a novidade do Rock Plus no seu app MyRock!"
+    },
+    {
+      "type": "media",
+      "mediaType": "image",
+      "path": "uploads/media/20250721_121353_WhatsApp_Image_2025-07-15_at_14.40.54.jpeg",
+      "caption": "da uma olhada lá.",
+      "uploadMethod": "upload"
+    },
+    {
+      "type": "media",
+      "mediaType": "video",
+      "path": "uploads/media/20250721_121731_WhatsApp_Video_2025-07-11_at_18.03.54.mp4",
+      "caption": "veja como funciona!",
+      "uploadMethod": "upload"
+    }
+  ],
+  "interval": 10,
+  "fallback_name": "teste"
+}

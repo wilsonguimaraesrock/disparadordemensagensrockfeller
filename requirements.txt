@@ -1,0 +1,37 @@
+# WhatsApp API Sender - Dependencies
+# Instale com: pip install -r requirements.txt
+
+# Requisições HTTP
+requests==2.31.0
+
+# Manipulação de planilhas Excel
+openpyxl==3.1.2
+
+# Manipulação de dados (para logs e análises)
+pandas==2.1.4
+
+# Barra de progresso
+tqdm==4.66.1
+
+# Gerenciamento de variáveis de ambiente
+python-dotenv==1.0.0
+
+# Validação de tipos (opcional, para desenvolvimento)
+typing-extensions==4.9.0
+
+# Detecção de tipo de arquivo (opcional)
+python-magic==0.4.27
+
+# Logging avançado (opcional)
+colorlog==6.8.0
+
+# Formatação de data/hora
+python-dateutil==2.8.2
+
+# Interface Gráfica (Tkinter)
+customtkinter==5.2.0
+Pillow==10.1.0
+
+# Interface Web
+Flask==3.0.0
+Werkzeug==3.0.1 

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+  <rect width="200" height="200" fill="#4CAF50"/>
+  <text x="100" y="100" font-family="Arial" font-size="16" fill="white" text-anchor="middle" dominant-baseline="middle">Teste WhatsApp</text>
+  <text x="100" y="120" font-family="Arial" font-size="12" fill="white" text-anchor="middle" dominant-baseline="middle">30/07/2025 11:09</text>
+</svg>

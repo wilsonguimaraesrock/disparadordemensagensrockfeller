@@ -1,0 +1,74 @@
+# Logs
+*.log
+*.csv
+logs/
+
+# Arquivos de configuração com dados sensíveis
+config.json
+config_*.json
+.env
+
+# Imagens temporárias e screenshots
+*.png
+debug_*.png
+qr_*.png
+element_*.png
+session_*.png
+step*.png
+waha_*.png
+
+# Arquivos HTML temporários
+*.html
+current_page_content.html
+final_page_content.html
+session_final_content.html
+debug_status.html
+
+# Uploads e mídia temporária
+uploads/
+
+# Cache do Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Node modules
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Arquivos JSON temporários
+diagnostico_*.json
+teste_*.json
+found_elements.json
+qr_elements_*.json
+session_info.json
+
+# Arquivos de exemplo específicos
+contatos_exemplo.xlsx
+sample.xlsx
+
+# Arquivos de script temporários
+*.bat
+start_web.bat

@@ -1,0 +1,12 @@
+{
+  "name": "Teste Template",
+  "created_at": "2025-07-21T12:10:10.475907",
+  "sequence": [
+    {
+      "type": "text",
+      "content": "Olá teste"
+    }
+  ],
+  "interval": 5,
+  "fallback_name": "amigo"
+}
