@@ -14,7 +14,7 @@ from datetime import datetime
 class TesteMidiaEvolution:
     def __init__(self):
         self.config = {
-            'base_url': 'http://localhost:8080',
+            'base_url': 'http://localhost:8081',
             'token': 'evolution-api-key-2025',
             'instance_name': 'whatsapp-sender-v2'
         }
@@ -259,7 +259,7 @@ def main():
         print("\n⚠️ Instância desconectada. Tentando conectar...")
         testador.conectar_instancia()
         print("\n💡 Para conectar o WhatsApp:")
-        print("   1. Acesse: http://localhost:8080")
+        print("   1. Acesse: http://localhost:8081")
         print("   2. Vá para a instância 'whatsapp-sender-v2'")
         print("   3. Escaneie o QR Code com seu WhatsApp")
         print("\n⏳ Aguardando conexão... (pressione Enter para continuar os testes)")

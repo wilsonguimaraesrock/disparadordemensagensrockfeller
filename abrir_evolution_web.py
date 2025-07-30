@@ -11,7 +11,7 @@ import requests
 def verificar_evolution_api():
     """Verifica se a Evolution API está rodando"""
     try:
-        response = requests.get("http://localhost:8080", timeout=5)
+        response = requests.get("http://localhost:8081", timeout=5)
         if response.status_code == 200:
             print("✅ Evolution API está rodando")
             return True
@@ -36,7 +36,7 @@ def main():
         return
     
     # Abrir no navegador
-    url = "http://localhost:8080"
+    url = "http://localhost:8081"
     print(f"\n🚀 Abrindo {url} no navegador...")
     
     try:
@@ -58,7 +58,7 @@ def main():
         print("\n🔍 Verificando status da conexão...")
         try:
             response = requests.get(
-                "http://localhost:8080/instance/connectionState/whatsapp-sender-v2",
+                "http://localhost:8081/instance/connectionState/whatsapp-sender-v2",
                 headers={'apikey': 'evolution-api-key-2025'},
                 timeout=5
             )

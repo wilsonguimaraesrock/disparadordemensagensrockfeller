@@ -17,7 +17,7 @@ from pathlib import Path
 class EvolutionAPISetup:
     def __init__(self):
         self.config = {
-            'base_url': 'http://localhost:8080',
+            'base_url': 'http://localhost:8081',
             'api_key': 'evolution-api-key-2025',
             'instance_name': 'whatsapp-sender-v2'
         }
@@ -123,8 +123,8 @@ AUTHENTICATION_API_KEY={self.config['api_key']}
 AUTHENTICATION_EXPOSE_IN_FETCH_INSTANCES=true
 
 # Server Configuration
-SERVER_PORT=8080
-SERVER_URL=http://localhost:8080
+SERVER_PORT=8081
+SERVER_URL=http://localhost:8081
 
 # Database (opcional - usar SQLite para simplicidade)
 DATABASE_ENABLED=true

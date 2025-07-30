@@ -10,7 +10,7 @@ import json
 from datetime import datetime
 
 # Configurações
-BASE_URL = "http://localhost:8080"
+BASE_URL = "http://localhost:8081"
 API_KEY = "evolution-api-key-2025"
 INSTANCE_NAME = "whatsapp-sender-v2"
 
@@ -128,7 +128,7 @@ def main():
         else:
             print("\n⚠️  WhatsApp não está conectado.")
             print("Para conectar:")
-            print("1. Acesse http://localhost:8080")
+            print("1. Acesse http://localhost:8081")
             print("2. Encontre a instância 'whatsapp-sender-v2'")
             print("3. Clique em Connect e escaneie o QR Code")
     

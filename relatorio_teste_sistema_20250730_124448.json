@@ -1,0 +1,25 @@
+{
+  "arquivos_principais": {
+    "enviar_mensagens_lote.py": true,
+    "api_sender.py": true,
+    "utils.py": true,
+    "config.json": true,
+    "docker-compose.yml": true
+  },
+  "configuracao": {
+    "provider": true,
+    "base_url": true,
+    "instance_id": true,
+    "token": true
+  },
+  "apis": {
+    "evolution_conectividade": false
+  },
+  "funcionalidades": {},
+  "resumo": {
+    "total_testes": 7,
+    "testes_sucesso": 6,
+    "taxa_sucesso": 85.71428571428571,
+    "timestamp": "2025-07-30T12:44:48.490892"
+  }
+}

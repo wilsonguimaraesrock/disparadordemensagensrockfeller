@@ -111,7 +111,7 @@ docker-compose up -d
 docker ps
 
 # 3. Acessar interface web
-# http://localhost:8080
+# http://localhost:8081
 
 # 4. Conectar WhatsApp via QR Code
 ```
