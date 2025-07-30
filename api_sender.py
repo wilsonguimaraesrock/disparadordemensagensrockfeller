@@ -8,6 +8,8 @@ import requests
 import logging
 import csv
 import mimetypes
+import json
+import time
 from datetime import datetime
 from pathlib import Path
 from typing import Optional, Dict, Any
@@ -519,64 +521,171 @@ class WhatsAppAPISender:
             return False
     
     def _send_media_evolution_api(self, numero: str, caption: str, caminho_midia: str, base_url: str, instance_id: str) -> bool:
-        """Envia arquivo de mídia via Evolution API"""
-        try:
-            # Determinar tipo de mídia
-            mime_type, _ = mimetypes.guess_type(caminho_midia)
-            
-            if mime_type:
-                if mime_type.startswith('image/'):
-                    endpoint = f"/message/sendMedia/{instance_id}"
-                    media_type = "image"
-                elif mime_type.startswith('video/'):
-                    endpoint = f"/message/sendMedia/{instance_id}"
-                    media_type = "video"
-                elif mime_type.startswith('audio/'):
-                    endpoint = f"/message/sendWhatsAppAudio/{instance_id}"
-                    media_type = "audio"
-                else:
-                    endpoint = f"/message/sendMedia/{instance_id}"
-                    media_type = "document"
-            else:
-                endpoint = f"/message/sendMedia/{instance_id}"
-                media_type = "document"
-            
-            url = f"{base_url}{endpoint}"
-            
-            # Preparar dados para upload
-            with open(caminho_midia, 'rb') as file:
-                files = {'attachment': file}
-                data = {
-                    'number': numero,
-                    'caption': caption,
-                    'mediatype': media_type
-                }
+        """Envia arquivo de mídia via Evolution API com retry logic avançado"""
+        max_tentativas = 3
+        timeouts = [30, 60, 120]  # Timeouts progressivos
+        
+        # Validações iniciais
+        if not os.path.exists(caminho_midia):
+            self.log_result(numero, 'erro', f'Arquivo não encontrado: {caminho_midia}')
+            return False
+        
+        # Verificar tamanho do arquivo
+        tamanho_mb = os.path.getsize(caminho_midia) / (1024 * 1024)
+        if tamanho_mb > 64:  # Limite amplo para Evolution API
+            self.log_result(numero, 'erro', f'Arquivo muito grande: {tamanho_mb:.1f}MB (máximo 64MB)')
+            return False
+        
+        for tentativa in range(max_tentativas):
+            try:
+                print(f"🔄 [MÍDIA] Tentativa {tentativa + 1}/{max_tentativas} para {os.path.basename(caminho_midia)}")
                 
-                # Enviar sem Content-Type header para upload de arquivo
-                headers = self.session.headers.copy()
-                if 'Content-Type' in headers:
-                    del headers['Content-Type']
+                # Determinar tipo de mídia e endpoint
+                mime_type, _ = mimetypes.guess_type(caminho_midia)
+                endpoint, media_type = self._get_evolution_endpoint_and_type(mime_type)
                 
-                response = requests.post(url, files=files, data=data, headers=headers, timeout=60)
+                url = f"{base_url}{endpoint.format(instance_id=instance_id)}"
+                print(f"🔗 [MÍDIA] URL: {url}")
+                print(f"📎 [MÍDIA] Tipo: {media_type} | Tamanho: {tamanho_mb:.1f}MB")
                 
-                if response.status_code in [200, 201]:  # 200 OK ou 201 Created
-                    result = response.json()
-                    # Para Evolution API, verificar se há key no resultado
-                    if result.get('key') or result.get('messageId'):
-                        self.log_result(numero, 'sucesso', f'Mídia enviada: {os.path.basename(caminho_midia)}')
-                        return True
+                # Preparar dados para upload
+                with open(caminho_midia, 'rb') as file:
+                    files = {'attachment': file}
+                    data = {
+                        'number': numero,
+                        'caption': caption,
+                        'mediatype': media_type
+                    }
+                    
+                    # Headers otimizados para upload
+                    headers = self.session.headers.copy()
+                    if 'Content-Type' in headers:
+                        del headers['Content-Type']
+                    
+                    timeout = timeouts[min(tentativa, len(timeouts) - 1)]
+                    print(f"⏱️  [MÍDIA] Timeout: {timeout}s")
+                    
+                    response = requests.post(url, files=files, data=data, 
+                                           headers=headers, timeout=timeout)
+                    
+                    print(f"📡 [MÍDIA] Status: {response.status_code}")
+                    
+                    # Verificar resposta
+                    if response.status_code in [200, 201]:
+                        try:
+                            result = response.json()
+                            print(f"📋 [MÍDIA] Resposta: {result}")
+                            
+                            # Verificar sucesso da Evolution API
+                            if result.get('key') or result.get('messageId') or result.get('id'):
+                                print(f"✅ [MÍDIA] Mídia enviada com sucesso!")
+                                self.log_result(numero, 'sucesso', 
+                                              f'Mídia enviada: {os.path.basename(caminho_midia)} ({tamanho_mb:.1f}MB)')
+                                return True
+                            else:
+                                error_msg = result.get('message', 'Resposta sem ID válido')
+                                print(f"⚠️  [MÍDIA] Falha na API: {error_msg}")
+                                
+                                if tentativa < max_tentativas - 1:
+                                    print(f"🔄 [MÍDIA] Tentando novamente em 3s...")
+                                    import time
+                                    time.sleep(3)
+                                    continue
+                                else:
+                                    self.log_result(numero, 'erro', error_msg)
+                                    return False
+                                    
+                        except json.JSONDecodeError as json_error:
+                            print(f"⚠️  [MÍDIA] Erro JSON: {json_error}")
+                            if tentativa < max_tentativas - 1:
+                                print(f"🔄 [MÍDIA] Tentando novamente...")
+                                import time
+                                time.sleep(2)
+                                continue
+                            else:
+                                self.log_result(numero, 'erro', f'Erro JSON: {json_error}')
+                                return False
+                    
+                    elif response.status_code == 401:
+                        print(f"🔐 [MÍDIA] Erro de autenticação (401)")
+                        self.log_result(numero, 'erro', 'Token de API inválido')
+                        return False  # Não tentar novamente para erro de auth
+                    
+                    elif response.status_code == 413:
+                        print(f"📏 [MÍDIA] Arquivo muito grande (413)")
+                        self.log_result(numero, 'erro', 'Arquivo excede limite do servidor')
+                        return False  # Não tentar novamente para arquivo grande
+                    
+                    elif response.status_code in [500, 502, 503, 504]:
+                        print(f"🔧 [MÍDIA] Erro do servidor ({response.status_code})")
+                        if tentativa < max_tentativas - 1:
+                            wait_time = (tentativa + 1) * 5  # 5s, 10s, 15s
+                            print(f"⏳ [MÍDIA] Aguardando {wait_time}s antes de tentar novamente...")
+                            import time
+                            time.sleep(wait_time)
+                            continue
+                        else:
+                            self.log_result(numero, 'erro', f'Erro servidor: HTTP {response.status_code}')
+                            return False
+                    
                     else:
-                        error_msg = result.get('message', 'Erro ao enviar mídia')
-                        self.log_result(numero, 'erro', error_msg)
-                        return False
+                        print(f"❌ [MÍDIA] HTTP {response.status_code}")
+                        if tentativa < max_tentativas - 1:
+                            print(f"🔄 [MÍDIA] Tentando novamente...")
+                            import time
+                            time.sleep(2)
+                            continue
+                        else:
+                            self.log_result(numero, 'erro', f'HTTP {response.status_code}')
+                            return False
+                            
+            except requests.exceptions.Timeout:
+                print(f"⏰ [MÍDIA] Timeout na tentativa {tentativa + 1}")
+                if tentativa < max_tentativas - 1:
+                    print(f"🔄 [MÍDIA] Aumentando timeout e tentando novamente...")
+                    continue
                 else:
-                    self.log_result(numero, 'erro', f'HTTP {response.status_code} ao enviar mídia')
+                    self.log_result(numero, 'erro', f'Timeout após {max_tentativas} tentativas')
                     return False
                     
-        except Exception as e:
-            self.logger.error(f"Erro ao enviar mídia Evolution API para {numero}: {e}")
-            self.log_result(numero, 'erro', f'Erro mídia: {str(e)}')
-            return False
+            except requests.exceptions.ConnectionError:
+                print(f"🔌 [MÍDIA] Erro de conexão na tentativa {tentativa + 1}")
+                if tentativa < max_tentativas - 1:
+                    print(f"🔄 [MÍDIA] Tentando reconectar...")
+                    import time
+                    time.sleep(5)
+                    continue
+                else:
+                    self.log_result(numero, 'erro', 'Erro de conexão persistente')
+                    return False
+                    
+            except Exception as e:
+                print(f"💥 [MÍDIA] Erro inesperado: {e}")
+                if tentativa < max_tentativas - 1:
+                    print(f"🔄 [MÍDIA] Tentando novamente...")
+                    import time
+                    time.sleep(2)
+                    continue
+                else:
+                    self.logger.error(f"Erro ao enviar mídia Evolution API para {numero}: {e}")
+                    self.log_result(numero, 'erro', f'Erro: {str(e)}')
+                    return False
+        
+        return False
+    
+    def _get_evolution_endpoint_and_type(self, mime_type: str) -> tuple:
+        """Determina endpoint e tipo de mídia para Evolution API"""
+        if not mime_type:
+            return "/message/sendMedia/{instance_id}", "document"
+        
+        if mime_type.startswith('image/'):
+            return "/message/sendMedia/{instance_id}", "image"
+        elif mime_type.startswith('video/'):
+            return "/message/sendMedia/{instance_id}", "video"
+        elif mime_type.startswith('audio/'):
+            return "/message/sendWhatsAppAudio/{instance_id}", "audio"
+        else:
+            return "/message/sendMedia/{instance_id}", "document"
     
     def get_log_filename(self) -> str:
         """Retorna o nome do arquivo de log"""
